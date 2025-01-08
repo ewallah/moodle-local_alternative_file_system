@@ -378,8 +378,8 @@ final class S3Request {
     /**
      * CURL write callback
      *
-     * @param resource &$curl CURL resource
-     * @param string &$data   Data
+     * @param resource $curl CURL resource
+     * @param string $data   Data
      *
      * @return integer
      */

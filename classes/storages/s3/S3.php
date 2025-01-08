@@ -239,13 +239,13 @@ class S3 {
      * Set proxy information
      *
      * @param string $host   Proxy hostname and port (localhost:1234)
-     * @param string $user   Proxy username
-     * @param string $pass   Proxy password
-     * @param  $type
+     * @param string|null $user   Proxy username
+     * @param string|null $pass   Proxy password
+     * @param int $type
      *
      * @return void
      */
-    public static function setProxy($host, $user = null, $pass = null, $type = CURLPROXY_SOCKS5) {
+    public static function setProxy(string $host, ?string $user = null, ?string $pass = null, $type = CURLPROXY_SOCKS5) {
         self::$proxy = array('host' => $host, 'type' => $type, 'user' => $user, 'pass' => $pass);
     }
 
@@ -346,7 +346,7 @@ class S3 {
                 $rest->error['message']), __FILE__, __LINE__);
             return false;
         }
-        $results = array();
+        $results = [];
         if (!isset($rest->body->Buckets)) return $results;
 
         if ($detailed) {
@@ -354,7 +354,7 @@ class S3 {
                 $results['owner'] = array(
                     'id' => (string)$rest->body->Owner->ID, 'name' => (string)$rest->body->Owner->DisplayName
                 );
-            $results['buckets'] = array();
+            $results['buckets'] = [];
             foreach ($rest->body->Buckets->Bucket as $b)
                 $results['buckets'][] = array(
                     'name' => (string)$b->Name, 'time' => strtotime((string)$b->CreationDate)
@@ -396,7 +396,7 @@ class S3 {
             return false;
         }
 
-        $results = array();
+        $results = [];
 
         $nextMarker = null;
         if (isset($response->body, $response->body->Contents))
@@ -457,8 +457,8 @@ class S3 {
      * Put a bucket
      *
      * @param string $bucket   Bucket name
-     * @param $acl
-     * @param string $location Set as "EU" to create buckets hosted in Europe
+     * @param string $acl
+     * @param bool|string $location Set as "EU" to create buckets hosted in Europe
      *
      * @return boolean
      */
@@ -561,15 +561,15 @@ class S3 {
      * @param mixed $input                   Input data
      * @param string $bucket                 Bucket name
      * @param string $uri                    Object URI
-     * @param \ $acl
+     * @param string $acl
      * @param array $metaHeaders             Array of x-amz-meta-* headers
      * @param array $requestHeaders          Array of request headers or content type as a string
-     * @param  $storageClass
-     * @param  $serverSideEncryption
+     * @param string $storageClass
+     * @param string $serverSideEncryption
      *
      * @return boolean
      */
-    public static function putObject($input, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD, $serverSideEncryption = self::SSE_NONE) {
+    public static function putObject($input, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = [], $requestHeaders = [], $storageClass = self::STORAGE_CLASS_STANDARD, $serverSideEncryption = self::SSE_NONE) {
         if ($input === false) return false;
         $rest = new S3Request('PUT', $bucket, $uri, self::$endpoint);
 
@@ -647,13 +647,13 @@ class S3 {
      * @param string $file        Input file path
      * @param string $bucket      Bucket name
      * @param string $uri         Object URI
-     * @param  $acl
+     * @param string $acl
      * @param array $metaHeaders  Array of x-amz-meta-* headers
      * @param string $contentType Content type
      *
      * @return boolean
      */
-    public static function putObjectFile($file, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $contentType = null) {
+    public static function putObjectFile($file, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = [], $contentType = null) {
         return self::putObject(self::inputFile($file), $bucket, $uri, $acl, $metaHeaders, $contentType);
     }
 
@@ -663,13 +663,13 @@ class S3 {
      * @param string $string      Input data
      * @param string $bucket      Bucket name
      * @param string $uri         Object URI
-     * @param  $acl
+     * @param atring $acl
      * @param array $metaHeaders  Array of x-amz-meta-* headers
      * @param string $contentType Content type
      *
      * @return boolean
      */
-    public static function putObjectString($string, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $contentType = 'text/plain') {
+    public static function putObjectString($string, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = [], $contentType = 'text/plain') {
         return self::putObject($string, $bucket, $uri, $acl, $metaHeaders, $contentType);
     }
 
@@ -735,14 +735,14 @@ class S3 {
      * @param string $srcUri         Source object URI
      * @param string $bucket         Destination bucket name
      * @param string $uri            Destination object URI
-     * @param  $acl
+     * @param string $acl
      * @param array $metaHeaders     Optional array of x-amz-meta-* headers
      * @param array $requestHeaders  Optional array of request headers (content type, disposition, etc.)
-     * @param  $storageClass
+     * @param string $storageClass
      *
      * @return mixed | false
      */
-    public static function copyObject($srcBucket, $srcUri, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD) {
+    public static function copyObject($srcBucket, $srcUri, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = [], $requestHeaders = [], $storageClass = self::STORAGE_CLASS_STANDARD) {
         $rest = new S3Request('PUT', $bucket, $uri, self::$endpoint);
         $rest->setHeader('Content-Length', 0);
         foreach ($requestHeaders as $h => $v)
@@ -935,7 +935,7 @@ class S3 {
      *
      * @return boolean
      */
-    public static function setAccessControlPolicy($bucket, $uri = '', $acp = array()) {
+    public static function setAccessControlPolicy($bucket, $uri = '', $acp = []) {
         $dom = new \DOMDocument;
         $dom->formatOutput = true;
         $accessControlPolicy = $dom->createElement('AccessControlPolicy');
@@ -1005,14 +1005,14 @@ class S3 {
             return false;
         }
 
-        $acp = array();
+        $acp = [];
         if (isset($rest->body->Owner, $rest->body->Owner->ID, $rest->body->Owner->DisplayName))
             $acp['owner'] = array(
                 'id' => (string)$rest->body->Owner->ID, 'name' => (string)$rest->body->Owner->DisplayName
             );
 
         if (isset($rest->body->AccessControlList)) {
-            $acp['acl'] = array();
+            $acp['acl'] = [];
             foreach ($rest->body->AccessControlList->Grant as $grant) {
                 foreach ($grant->Grantee as $grantee) {
                     if (isset($grantee->ID, $grantee->DisplayName)) // CanonicalUser
@@ -1126,7 +1126,7 @@ class S3 {
      *
      * @param string $bucket          Bucket name
      * @param string $uriPrefix       Object URI prefix
-     * @param  $acl
+     * @param string $acl
      * @param integer $lifetime       Lifetime in seconds
      * @param integer $maxFileSize    Maximum filesize in bytes (default 5MB)
      * @param string $successRedirect Redirect URL or 200 / 201 status code
@@ -1137,11 +1137,11 @@ class S3 {
      * @return object
      */
     public static function getHttpUploadPostParams($bucket, $uriPrefix = '', $acl = self::ACL_PRIVATE, $lifetime = 3600,
-                                                   $maxFileSize = 5242880, $successRedirect = "201", $amzHeaders = array(), $headers = array(), $flashVars = false) {
+                                                   $maxFileSize = 5242880, $successRedirect = "201", $amzHeaders = [], $headers = [], $flashVars = false) {
         // Create policy object
         $policy = new \stdClass;
         $policy->expiration = gmdate('Y-m-d\TH:i:s\Z', (self::__getTime() + $lifetime));
-        $policy->conditions = array();
+        $policy->conditions = [];
         $obj = new \stdClass;
         $obj->bucket = $bucket;
         array_push($policy->conditions, $obj);
@@ -1201,7 +1201,7 @@ class S3 {
      *
      * @return array | false
      */
-    public static function createDistribution($bucket, $enabled = true, $cnames = array(), $comment = null, $defaultRootObject = null, $originAccessIdentity = null, $trustedSigners = array()) {
+    public static function createDistribution($bucket, $enabled = true, $cnames = [], $comment = null, $defaultRootObject = null, $originAccessIdentity = null, $trustedSigners = []) {
         if (!extension_loaded('openssl')) {
             self::__triggerError(sprintf("S3::createDistribution({$bucket}, " . (int)$enabled . ", [], '$comment'): %s",
                 "CloudFront functionality requires SSL"), __FILE__, __LINE__);
@@ -1366,7 +1366,7 @@ class S3 {
                 $rest->error['code'], $rest->error['message']), __FILE__, __LINE__);
             return false;
         } elseif ($rest->body instanceof \SimpleXMLElement && isset($rest->body->DistributionSummary)) {
-            $list = array();
+            $list = [];
             if (isset($rest->body->Marker, $rest->body->MaxItems, $rest->body->IsTruncated)) {
                 //$info['marker'] = (string)$rest->body->Marker;
                 //$info['maxItems'] = (int)$rest->body->MaxItems;
@@ -1404,7 +1404,7 @@ class S3 {
         }
 
         if (isset($rest->body->CloudFrontOriginAccessIdentitySummary)) {
-            $identities = array();
+            $identities = [];
             foreach ($rest->body->CloudFrontOriginAccessIdentitySummary as $identity)
                 if (isset($identity->S3CanonicalUserId))
                     $identities[(string)$identity->Id] = array('id' => (string)$identity->Id, 's3CanonicalUserId' => (string)$identity->S3CanonicalUserId);
@@ -1501,7 +1501,7 @@ class S3 {
                 $rest->error['code'], $rest->error['message']), E_USER_WARNING);
             return false;
         } elseif ($rest->body instanceof \SimpleXMLElement && isset($rest->body->InvalidationSummary)) {
-            $list = array();
+            $list = [];
             foreach ($rest->body->InvalidationSummary as $summary)
                 $list[(string)$summary->Id] = (string)$summary->Status;
 
@@ -1528,7 +1528,7 @@ class S3 {
      *
      * @return string
      */
-    private static function __getCloudFrontDistributionConfigXML($bucket, $enabled, $comment, $callerReference = '0', $cnames = array(), $defaultRootObject = null, $originAccessIdentity = null, $trustedSigners = array()) {
+    private static function __getCloudFrontDistributionConfigXML($bucket, $enabled, $comment, $callerReference = '0', $cnames = [], $defaultRootObject = null, $originAccessIdentity = null, $trustedSigners = []) {
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->formatOutput = true;
         $distributionConfig = $dom->createElement('DistributionConfig');
@@ -1564,7 +1564,7 @@ class S3 {
      *
      * @internal Used to parse the CloudFront DistributionConfig node to an array
      *
-     * @param object &$node DOMNode
+     * @param object $node DOMNode
      *
      * @return array
      */
@@ -1572,7 +1572,7 @@ class S3 {
         if (isset($node->DistributionConfig))
             return self::__parseCloudFrontDistributionConfig($node->DistributionConfig);
 
-        $dist = array();
+        $dist = [];
         if (isset($node->Id, $node->Status, $node->LastModifiedTime, $node->DomainName)) {
             $dist['id'] = (string)$node->Id;
             $dist['status'] = (string)$node->Status;
@@ -1596,12 +1596,12 @@ class S3 {
 
         $dist['defaultRootObject'] = isset($node->DefaultRootObject) ? (string)$node->DefaultRootObject : null;
 
-        $dist['cnames'] = array();
+        $dist['cnames'] = [];
         if (isset($node->CNAME))
             foreach ($node->CNAME as $cname)
                 $dist['cnames'][(string)$cname] = (string)$cname;
 
-        $dist['trustedSigners'] = array();
+        $dist['trustedSigners'] = [];
         if (isset($node->TrustedSigners))
             foreach ($node->TrustedSigners as $signer) {
                 if (isset($signer->Self))
@@ -1621,7 +1621,7 @@ class S3 {
      *
      * @internal Used to parse the CloudFront S3Request::getResponse() output
      *
-     * @param object &$rest S3Request instance
+     * @param object $rest S3Request instance
      *
      * @return object
      */
@@ -1652,7 +1652,7 @@ class S3 {
      *
      * @internal Used to get mime types
      *
-     * @param string &$file File path
+     * @param string $file File path
      *
      * @return string
      */

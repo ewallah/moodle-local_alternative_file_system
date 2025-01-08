@@ -108,6 +108,7 @@ class s3_file_system extends storage_file_system implements i_file_system {
      *
      * @param string $contenthash
      * @param bool $fetchifnotfound
+     * @param bool $localfile
      *
      * @return string The full path to the content file
      *

@@ -52,7 +52,7 @@ if (optional_param("execute", false, PARAM_INT)) {
               FROM {files}
              WHERE contenthash NOT IN (
                     SELECT contenthash
-                      FROM {local_alternativefilesystemf}
+                      FROM {local_alternative_file_system}
                      WHERE storage = '{$config->settings_destino}'
                  )
                AND filename    LIKE '__%'

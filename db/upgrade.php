@@ -37,8 +37,8 @@ function xmldb_local_alternative_file_system_upgrade($oldversion) {
 
     if ($oldversion < 2024110501) {
 
-        if (!$dbman->table_exists("local_alternativefilesystemf")) {
-            $table = new xmldb_table("local_alternativefilesystemf");
+        if (!$dbman->table_exists("local_alternative_file_system")) {
+            $table = new xmldb_table("local_alternative_file_system");
 
             $table->add_field("id", XMLDB_TYPE_INTEGER, "10", true, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field("contenthash", XMLDB_TYPE_CHAR, "40", null, XMLDB_NOTNULL);
@@ -51,13 +51,13 @@ function xmldb_local_alternative_file_system_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        if ($dbman->table_exists("local_alternativefilesystemf")) {
+        if ($dbman->table_exists("local_alternative_file_system")) {
             $sql = "INSERT
-                       INTO {local_alternativefilesystemf} (contenthash, storage, timemodifield)
-                     SELECT contenthash, storage, timemodifield FROM {local_alternativefilesystemf}";
+                       INTO {local_alternative_file_system} (contenthash, storage, timemodifield)
+                     SELECT contenthash, storage, timemodifield FROM {local_alternative_file_system}";
             $DB->execute($sql);
 
-            $table = new xmldb_table("local_alternativefilesystemf");
+            $table = new xmldb_table("local_alternative_file_system");
             $dbman->drop_table($table);
         }
 
